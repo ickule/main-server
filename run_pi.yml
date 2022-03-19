@@ -1,0 +1,6 @@
+---
+- hosts: pi
+  become: yes
+
+  tasks:
+    - import_tasks: tasks/setup.yml
