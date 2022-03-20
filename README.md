@@ -11,7 +11,7 @@ To setup a new key, you can use the following.
 
 1. Genrate a new ssh key
 
-```bash
+```sh
 ssh-keygen -t ed25516 -a 100 -f ~/.ssh/enter_your_custom_name
 ```
 
@@ -19,14 +19,14 @@ ssh-keygen -t ed25516 -a 100 -f ~/.ssh/enter_your_custom_name
 
 1. Register your ssh key with your agent
 
-```bash
+```sh
 eval $(ssh-agent -s)  # This starts your agent and gives you its PID
 ssh-add /path/to/your/private/key/file
 ```
 
 3. Copy the ssh key to your server
 
-```bash
+```sh
 ssh-copy-id -i /path/to/your/private/key/file username@ip_address
 ```
 
@@ -35,3 +35,11 @@ ssh-copy-id -i /path/to/your/private/key/file username@ip_address
 #### 1.2.1 Pi
 
 ```python-is-python3``` has been purged manually to prevent ansible decrepation warnings due to the prescence of ```/usr/bin/python```.
+I tried top set the variable ```ansible_interpreter=/usr/bin/python3``` explicitely but it did not remove the warning message.
+
+
+## Credits/Sources
+
+https://docs.ansible.com/ansible/latest/index.html
+https://docs.docker.com/
+https://github.com/shaderecker/ansible-pihole/tree/master/roles/updates (no liscence explicitely specified)
