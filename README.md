@@ -41,5 +41,7 @@ I tried top set the variable ```ansible_interpreter=/usr/bin/python3``` explicit
 ## Credits/Sources
 
 https://docs.ansible.com/ansible/latest/index.html
+
 https://docs.docker.com/
+
 https://github.com/shaderecker/ansible-pihole/tree/master/roles/updates (no liscence explicitely specified)
