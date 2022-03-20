@@ -17,6 +17,7 @@
   apt_repository:
     repo: deb {{ source_url }} {{ distribution_codename }} stable
     filename: docker
+    update_cache: yes
 
 - name: Install Docker
   apt:
