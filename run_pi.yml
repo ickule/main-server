@@ -3,4 +3,5 @@
   become: yes
 
   tasks:
+    - import_tasks: tasks/update.yml
     - import_tasks: tasks/setup.yml

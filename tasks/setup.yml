@@ -1,9 +1,3 @@
-- name: Update packages
-  apt:
-    update_cache: yes
-    upgrade: full
-    autoremove: yes
-
 - name: Remove un-needed packages
   apt:
     name: "{{ packages_to_remove }}"
