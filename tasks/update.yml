@@ -2,6 +2,7 @@
   apt:
     update_cache: yes
     upgrade: full
+    autoclean: yes
     autoremove: yes
 
 - name: Check if reboot is needed
