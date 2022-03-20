@@ -5,3 +5,4 @@ ssh_key: ~/.ssh/id_ed25519
 packages_to_remove:
 
 packages_to_install:
+  - lsb-release

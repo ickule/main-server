@@ -5,3 +5,4 @@
   tasks:
     - import_tasks: tasks/update.yml
     - import_tasks: tasks/setup.yml
+    - import_tasks: tasks/docker_setup.yml
