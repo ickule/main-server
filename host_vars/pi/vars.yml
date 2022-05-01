@@ -1,6 +1,6 @@
 username: pi
 ip: 192.168.1.2
-hostname: hole
+hostname: cake
 ssh_key: ~/.ssh/id_ed25519
 packages_to_remove:
 
