@@ -9,7 +9,7 @@ This repository will hold my personnal configs for the server(s) that I will run
 This setup assumes that you have key based ssh access to your server.
 To setup a new key, you can use the following.
 
-1. Genrate a new ssh key
+1. Generate a new ssh key
 
 ```sh
 ssh-keygen -t ed25516 -a 100 -f ~/.ssh/enter_your_custom_name
