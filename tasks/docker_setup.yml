@@ -29,8 +29,10 @@
     name: "{{ username }}"
     append: yes
     groups: docker
+  register: docker_group_changed
 
 - name: Restart Docker
   service:
     name: docker
     state: restarted
+  when: docker_group_changed.changed
