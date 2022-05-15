@@ -1,0 +1,20 @@
+- name: Ensure Samba-related packages are installed (Debian).
+  apt:
+    name:
+      - samba
+    state: latest
+
+- name: Adding the configuration for the
+  blockinfile:
+    path: /etc/samba/smb.conf
+    insertafter:
+    block: "[nas]\npath = {{ samba_share_path }}\nvalid users = {{ username }}\npublic = no\nwriteable = yes"
+    backup: yes
+  register: configuration_change
+
+- name: Ensure Samba is running and set to start on boot.
+  service:
+    name: smbd
+    state: started
+    enabled: true
+  when: configuration_change.changed
