@@ -15,14 +15,14 @@
 
 - name: Disable SSH password auth
   lineinfile:
-    dest: /etc/ssh/sshd_config
+    path: /etc/ssh/sshd_config
     regexp: "^PasswordAuthentication"
     line: "PasswordAuthentication no"
   register: sshd_config
 
 - name: Enable passwordless sudo for "{{ username }}"
   lineinfile:
-    dest: /etc/sudoers
+    path: /etc/sudoers
     regexp: "^%sudo"
     line: "{{ username }} ALL=(ALL) NOPASSWD: ALL"
     validate: "/usr/sbin/visudo -cf %s"
@@ -33,3 +33,9 @@
     enabled: yes
     state: restarted
   when: sshd_config.changed
+
+- name: Disable suspend when lid is closed
+  lineinfile:
+    path: /etc/systemd/logind.conf
+    regexp: "^HandleLidSwitch"
+    line: "HandleLidSwitch=ignore"
