@@ -1,0 +1,31 @@
+- name: Add template script file for Dyn DNS support
+  copy:
+    dest: /usr/local/bin/
+    src: Ressources/dyndns_nextcloud.sh
+  register: dyn_dns_script_added
+
+- name: Add in proper DYNHOST_ID value from secret vault
+  lineinfile:
+    path: /usr/local/bin/dyndns_nextcloud.sh
+    regexp: "^DYNHOST_ID"
+    line: "DYNHOST_ID='{{ dynhost_id }}'"
+
+- name: Add in proper DYNHOST_PASSWORD value from secret vault
+  lineinfile:
+    path: /usr/local/bin/dyndns_nextcloud.sh
+    regexp: "^DYNHOST_PASSWORD"
+    line: "DYNHOST_PASSWORD='{{ dynhost_password }}'"
+
+- name: Add in proper DOMAIN_NAME value from secret vault
+  lineinfile:
+    path: /usr/local/bin/dyndns_nextcloud.sh
+    regexp: "^DOMAIN_NAME"
+    line: "DOMAIN_NAME='{{ nextcloud_domain }}'"
+
+- name: Add a cron job to automatically update the DyNDNS IP address
+  cron:
+    job: "bash /usr/local/bin/dyndns_nextcloud.sh"
+    minute: "0" # Will run every hour at minute 0
+    name: "Update the DyNDNS IP address"
+    user: "{{ username }}"
+  when: dyn_dns_script_added.changed
