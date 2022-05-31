@@ -18,10 +18,11 @@
     repo: deb {{ source_url }} {{ distribution_codename }} stable
     filename: docker
 
-- name: Install Docker
+- name: Install Docker and the python3-docker module
   apt:
     name:
       - docker-ce
+      - python3-docker
     state: latest
 
 - name: Add user to docker group
