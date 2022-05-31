@@ -1,0 +1,153 @@
+- name: Create a docker network for nextcloud related services
+  docker_network:
+    name: nextcloud
+
+- name: Create data directory for Postgres
+  file:
+    mode: "0755"
+    path: "{{ docker_volumes_root }}/Postgres"
+    state: directory
+
+- name: Deploy the Postgres database for nextcloud
+  docker_container:
+    container_default_behavior: no_defaults
+    env:
+      POSTGRES_DB: nextcloud_database
+      POSTGRES_PASSWORD: "{{ postgres_nextcloud_password }}"
+      POSTGRES_USER: nextcloud_user
+    image: "postgres:alpine"
+    name: postgres
+    network_mode: defaults
+    networks:
+      - name: nextcloud
+    pull: yes
+    restart_policy: always
+    volumes:
+      - "{{ docker_volumes_root }}/Postgres/data:/var/lib/postgressql/data"
+
+- name: Create build directory for the custom Nextcloud image
+  file:
+    mode: "0755"
+    path: "{{ docker_volumes_root }}/Nextcloud/build"
+    state: directory
+
+- name: Copy the Dockerfile for the custom docker image
+  copy:
+    dest: "{{ docker_volumes_root }}/Nextcloud/build/Dockerfile"
+    mode: "0644"
+    src: Ressources/nextcloud/Dockerfile
+
+- name: Copy the supervisor file for the custom docker image
+  copy:
+    dest: "{{ docker_volumes_root }}/Nextcloud/build/supervisord.conf"
+    mode: "0644"
+    src: Ressources/nextcloud/supervisord.conf
+
+- name: Build the custom nextcloud image
+  docker_image:
+    build:
+      path: "{{ docker_volumes_root }}/Nextcloud/build"
+      pull: yes
+    name: custom_nextcloud
+    source: build
+    state: present
+
+- name: Deploy Nextcloud
+  docker_container:
+    container_default_behavior: no_defaults
+    env:
+      POSTGRES_DB: nextcloud_database
+      POSTGRES_HOST: postgres
+      POSTGRES_PASSWORD: "{{ postgres_nextcloud_password }}"
+      POSTGRES_USER: nextcloud_user
+      NEXTCLOUD_ADMIN_USER: "nextcloud_admin"
+      NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud_admin_password }}"
+      NEXTCLOUD_TRUSTED_DOMAINS: "{{ nextcloud_domain  }}"
+      NEXTCLOUD_UPDATE: "1"
+      SMTP_HOST: "{{ email_host }}"
+      SMTP_SECURE: "tls"
+      SMTP_PORT: "587"
+      SMTP_AUTHTYPE: "LOGIN"
+      SMTP_NAME: "{{ email_user }}"
+      SMTP_PASSWORD: "{{ email_password }}"
+      MAIL_FROM_ADDRESS: "{{ email_from_address }}"
+      MAIL_DOMAIN: "{{ email_domain }}"
+      TRUSTED_PROXIES: "caddy"
+    image: custom_nextcloud
+    name: nextcloud
+    network_mode: defaults
+    networks:
+      - name: nextcloud
+    restart_policy: always
+    volumes:
+      - "{{ docker_volumes_root }}/Nextcloud/data:/var/www/html"
+
+- name: Wainting for nextcloud to fully install
+  wait_for:
+    path: "{{ docker_volumes_root }}/Nextcloud/data/config/config.php"
+    search_regex: "1 => 'nextcloud.gsegt.eu',"
+    delay: 60
+
+- name: Add default country phone number to nextcloud
+  lineinfile:
+    path: "{{ docker_volumes_root }}/Nextcloud/data/config/config.php"
+    insertbefore: "^\\);$"
+    line: "  'default_phone_region' => 'FR',"
+  register: nextcloud_config_changed
+
+- name: Restart nextcloud after config change
+  docker_container:
+    container_default_behavior: no_defaults
+    name: nextcloud
+    restart: yes
+  when: nextcloud_config_changed.changed
+
+- name: Create data directory for the Caddy image
+  file:
+    mode: "0755"
+    path: "{{ docker_volumes_root }}/Caddy"
+    state: directory
+
+- name: Copy the Caddyfile for the Caddy image
+  copy:
+    dest: "{{ docker_volumes_root }}/Caddy/"
+    mode: "0644"
+    src: Ressources/nextcloud/Caddyfile
+  register: caddy_file_changed
+
+- name: Add proper email in caddy file
+  lineinfile:
+    path: "{{ docker_volumes_root }}/Caddy/Caddyfile"
+    regexp: "email your@email.org$"
+    line: "    email {{ email_user }}"
+
+- name: Add proper domain in caddy file
+  lineinfile:
+    path: "{{ docker_volumes_root }}/Caddy/Caddyfile"
+    regexp: "^yourdomain.org {$"
+    line: "{{ nextcloud_domain }} {"
+
+- name: Deploy Caddy
+  docker_container:
+    container_default_behavior: no_defaults
+    image: "caddy:alpine"
+    name: caddy
+    network_mode: defaults
+    networks:
+      - name: nextcloud
+    ports:
+      - "443:443"
+    pull: yes
+    restart_policy: always
+    volumes:
+      - "{{ docker_volumes_root }}/Caddy/Caddyfile:/etc/caddy/Caddyfile"
+      - "{{ docker_volumes_root }}/Caddy/data:/data"
+    volumes_from:
+      - nextcloud
+
+- name: Restart caddy caddyfile changed
+  docker_container:
+    container_default_behavior: no_defaults
+    name: caddy
+    restart: yes
+  when: caddy_file_changed.changed
