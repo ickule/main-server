@@ -1,0 +1,10 @@
+---
+- hosts: staging_server
+
+  handlers:
+    - import_tasks: handlers/main.yml
+
+  roles:
+    - role: samba
+    - role: dyndns
+    - role: nextcloud

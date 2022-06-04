@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Define your OVH DynHost ID & password and the domain name for which you wish to update DynHost
+DYNHOST_ID='{{ dynhost_id }}'
+DYNHOST_PASSWORD='{{ dynhost_password }}'
+DOMAIN_NAME='{{ nextcloud_domain }}'
+
+#####################
+####DO NOT TOUCH#####
+#####################
+
+PUBLIC_IP=$(curl --silent ifconfig.co)
+
+#Call OVH for update
+curl --silent --user "$DYNHOST_ID:$DYNHOST_PASSWORD" "https://www.ovh.com/nic/update?system=dyndns&hostname=$DOMAIN_NAME&myip=$PUBLIC_IP"

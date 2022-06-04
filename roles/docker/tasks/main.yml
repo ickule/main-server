@@ -1,0 +1,40 @@
+---
+- name: Install dependency packages for docker ansible installation
+  apt:
+    name:
+      - lsb-release
+      - gpg
+    state: latest
+
+- name: Store the distribution codename used as a full command output
+  command: lsb_release -cs
+  register: distribution_codename_cmd
+
+- name: Set variable for the playbook
+  set_fact:
+    distribution_codename: "{{ distribution_codename_cmd.stdout }}" # Keeping only the stdout as one line of the command rather than full ansible output
+    source_url: https://download.docker.com/linux/{{ ansible_distribution | lower }}
+
+- name: Add Docker apt key
+  apt_key:
+    url: "{{ source_url }}/gpg"
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+
+- name: Add Docker apt repository
+  apt_repository:
+    repo: deb {{ source_url }} {{ distribution_codename }} stable
+    filename: docker
+
+- name: Install Docker and the python3-docker module
+  apt:
+    name:
+      - docker-ce
+      - python3-docker
+    state: latest
+
+- name: Add user to docker group
+  user:
+    name: "{{ username }}"
+    append: yes
+    groups: docker
+  notify: Restart Docker

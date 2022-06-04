@@ -1,0 +1,28 @@
+---
+- name: Update SSH configuration to be more secure
+  register: sshd_config
+  lineinfile:
+    dest: "/etc/ssh/sshd_config"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: "sshd -T -f %s"
+    mode: 0644
+  with_items:
+    - regexp: "^#?PasswordAuthentication"
+      line: "PasswordAuthentication no"
+    - regexp: "^#?PermitRootLogin"
+      line: "PermitRootLogin no"
+    # - regexp: "^#?Port"
+    #   line: "Port {{ ssh_port }}"
+    - regexp: "^#?PermitEmptyPasswords"
+      line: "PermitEmptyPasswords no"
+    - regexp: "^#?X11Forwarding"
+      line: "X11Forwarding no"
+
+- name: Restart SSH daemon
+  service:
+    name: sshd
+    enabled: yes
+    state: restarted
+  when: sshd_config.changed

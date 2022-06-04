@@ -1,0 +1,5 @@
+---
+# Path to the ssh private key to use with ansible
+ssh_key: ~/.ssh/id_ed25519
+# Set the time at which the system should reboot after installing updates (24H format)
+autoupdate_reboot_time: 03:00

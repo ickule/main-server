@@ -1,0 +1,13 @@
+---
+- name: Install email related packages
+  apt:
+    name:
+      - msmtp-mta
+      - bsd-mailx
+    state: latest
+
+- name: Copy mstprc conf file.
+  template:
+    src: msmtprc.j2
+    dest: /etc/msmtprc
+  notify: Test mail

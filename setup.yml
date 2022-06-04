@@ -1,0 +1,13 @@
+---
+- hosts: staging_server
+
+  handlers:
+    - import_tasks: handlers/main.yml
+
+  roles:
+    - role: system
+    - role: hostname
+    - role: ssh
+    - role: unatended_upgrades
+    - role: docker
+    - role: zfs

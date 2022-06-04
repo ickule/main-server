@@ -1,5 +1,0 @@
-ssh_key: ~/.ssh/id_ed25519
-packages_to_install:
-  - lsb-release
-  - curl
-packages_to_remove:

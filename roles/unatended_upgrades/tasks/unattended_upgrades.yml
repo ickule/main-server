@@ -1,0 +1,15 @@
+---
+- name: Install essential packages for email sending
+  apt:
+    name:
+      - unattended-upgrades
+      - powermgmt-base # Prevent upgrade install if on battery
+    state: latest
+
+- name: Copy unattended-upgrades configuration files in place
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/apt/apt.conf.d/{{ item }}"
+  with_items:
+    - 02periodic
+    - 50unattended-upgrades

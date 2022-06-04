@@ -1,0 +1,34 @@
+---
+- name: Install Samba.
+  apt:
+    name:
+      - samba
+    state: latest
+
+- name: Create samba folder
+  file:
+    path: "{{ samba_share_path }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+
+- name: Adding the configuration for the share
+  blockinfile:
+    path: /etc/samba/smb.conf
+    insertafter:
+    block: |
+      [nas]
+      path = {{ samba_share_path }}
+      valid users = {{ username }}
+      public = no
+      writeable = yes
+    backup: yes
+  register: configuration_change
+
+- name: Ensure Samba is running and set to start on boot.
+  service:
+    name: smbd
+    state: started
+    enabled: true
+  when: configuration_change.changed

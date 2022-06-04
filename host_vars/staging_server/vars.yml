@@ -1,0 +1,6 @@
+---
+username: staging
+ip: 192.168.1.19
+hostname: staging
+samba_share_path: /zpool/encrypted/media
+docker_volumes_root: /zpool/encrypted/system/docker/volumes

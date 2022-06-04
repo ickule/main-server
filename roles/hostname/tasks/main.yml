@@ -1,0 +1,14 @@
+---
+- name: Store oiriginal hostname
+  command: cat /etc/hostname
+  register: original_hostname_cmd
+
+- name: Change hostname
+  hostname:
+    name: "{{ hostname }}"
+
+- name: Replace old hostname with new hostname
+  replace:
+    path: /etc/hosts
+    regexp: "{{ original_hostname_cmd.stdout }}"
+    replace: "{{ hostname }}"

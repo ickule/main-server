@@ -1,0 +1,32 @@
+{
+	email {{ msmtp_account.user }}
+}
+
+{{ nextcloud_domain }} {
+	encode gzip
+	root * /var/www/html
+	file_server
+	php_fastcgi nextcloud:9000
+	header {
+		Strict-Transport-Security max-age=31536000;
+	}
+	redir /.well-known/carddav /remote.php/carddav 301
+	redir /.well-known/caldav /remote.php/caldav 301
+	# rewrite /.well-known/carddav /remote.php/dav
+	# rewrite /.well-known/caldav /remote.php/dav
+	# reverse_proxy {nextcloud:localhost}
+	@forbidden {
+		path /.htaccess
+		path /data/*
+		path /config/*
+		path /db_structure
+		path /.xml
+		path /README
+		path /3rdparty/*
+		path /lib/*
+		path /templates/*
+		path /occ
+		path /console.php
+	}
+	respond @forbidden 404
+}

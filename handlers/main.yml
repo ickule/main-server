@@ -1,0 +1,15 @@
+---
+- name: Reboot
+  reboot:
+
+- name: Restart Docker
+  service:
+    name: docker
+    state: restarted
+
+# sending test mail using 'mail' command to root and test recipient
+- name: Test mail
+  shell: echo "Test mail from new/updated mSTMP\n\n $(uname -a)" | mail -s "Test mSMTP at $(hostname -f)" {{ msmtp_account.user }}
+  tags: mail
+  async: 30
+  poll: 5

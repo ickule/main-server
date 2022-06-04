@@ -1,0 +1,35 @@
+---
+- name: Update apt packages
+  apt:
+    update_cache: yes
+    upgrade: full
+    autoclean: yes
+    autoremove: yes
+
+- name: Uninstall libculr4 that prevents installing curl properly
+  apt:
+    name:
+      - libcurl4
+    state: absent
+
+- name: Check if reboot is needed
+  stat:
+    path: /var/run/reboot-required
+  register: reboot_required
+
+- name: Reboot if required
+  reboot:
+  when: reboot_required.stat.exists
+
+- name: Enable passwordless sudo for "{{ username }}"
+  lineinfile:
+    path: /etc/sudoers
+    regexp: "^%sudo"
+    line: "{{ username }} ALL=(ALL) NOPASSWD: ALL"
+    validate: "/usr/sbin/visudo -cf %s"
+
+- name: Disable suspend when lid is closed
+  lineinfile:
+    path: /etc/systemd/logind.conf
+    regexp: "^HandleLidSwitch"
+    line: "HandleLidSwitch=ignore"
