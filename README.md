@@ -32,7 +32,7 @@ To setup a new key, you can use the following.
 
 ### 1.2 Creating a secret vault
 
-Cretae a new secret vault with ansible:
+Create a new secret vault with ansible:
 
 ```bash
 ansible-vault create /secret/folder/path/secret.yml
@@ -40,50 +40,28 @@ ansible-vault create /secret/folder/path/secret.yml
 
 ### 1.3 Installation
 
-For reference, my Debian server installation looks like the folowing and is done through terminal install:
+For reference, my Ubuntu server installation looks like the folowing and is done through terminal install:
 
-1. Language -> to preference (English)
-2. Country, territory or area -> to preference (United Kinmgdom)
-3. Keymap -> to preference (British English)
-4. Hostanme -> to convenience
-5. Domain name -> to preference (skip)
-6. root password -> skip (Will use user password for sudo automatically)
-7. User -> to preference
-8. User password -> to preference
-9. Partitionning method -> Guided - use entire disk and set up encrypted LVM
-10. Partitionning scheme -> All files in one partition
-11. Debian archive mirror country -> United Kingdom
-12. Debian archive mirror -> deb.debian.org
-13. HTTP proxy information -> skip
-14. Participate in teh package usage survey -> to convenience (No)
-15. Choose software to  install -> SSH server, all other options disabled
-16. Install GRUB boot loader to your primary drive -> Yes
-17. Select disk for bootloader installation -> to preference
-
-```python3``` is installed manually as it is necessary for ansible operation
-
-```bash
-sudo apt install python3
-```
-
-I also remove the default swap and extend the partition to the maximum available space manually.
-
-```bash
-swapoff -a
-lvremove /dev/$hostname-vg/swap_1
-lvextend -l +100%FREE /dev/$hostname-vg/root
-resize2fs /dev/$hostname-vg/root
-sed -i -e 's/^/# /' /etc/initramfs-tools/conf.d/resume
-sed -i -e 's|\(/dev/mapper/$hostname--vg-swap_1\)|# \1|' /etc/fstab (-- is intentionnal)
-update-initramfs -u
-```
+1. Language -> English (UK)
+2. Installer update avaiilable -> Update to the new installer
+3. Keyboard configuration -> English (US), English (US)
+4. Choose type of install -> Ubuntu Server, Search for third-party drivers
+5. Network connections -> defaults
+6. Configure proxy -> empty
+7. Configure Ubuntu archive mirror -> default
+8. Guided storage configuration -> Use entire disk, set up disk as LVM group, Encrypt teh LVM group with LUKS
+9. Profile setup -> to preference
+10. SSH Setup -> Install OpenSSH server
+11. Third party driver -> install all
+12. Featured Server Snaps -> none
 
 ## 2. Using the ansible playbook
 
-With a system featuring the previosu requirements, we can run the playbooks.
+With a system featuring the previous requirements, we can run the playbooks.
 
 First, run the setup playbook. It will setup the system by:
 
+* Add dropbear supportr for ssh remote unlocking
 * Updating it to the latest version
 * Allow passwordless sudo for your user
 * Disable suspend when lid is closed
@@ -120,18 +98,12 @@ zfs set atime=off $pool_name
 
 With the ZFS storage setup, we can now proceed with installing the services:
 
-* Build and deploy a nextcloud stack featuring reverse proxy and SSL certificate management
-* Install scrript that update the IP of your local computer to OVH via DynDNS
 * Install and configure a samba share
+* Install script that update the IP of your local computer to OVH via DynDNS
+* Build and deploy a nextcloud stack featuring reverse proxy and SSL certificate management
 
 ```bash
 ansible-playbook deploy.yml
-```
-
-As a finishing touch, create a samba user and passwd from an existing user:
-
-```bash
-smbpasswd -a $username
 ```
 
 ## Credits/Sources
@@ -152,4 +124,8 @@ smbpasswd -a $username
 
 <https://github.com/notthebee/ansible-easy-vpn>
 
+<https://github.com/notthebee/infra>
+
 <https://github.com/chriswayg/ansible-msmtp-mailer>
+
+<https://www.cyberciti.biz/security/how-to-unlock-luks-using-dropbear-ssh-keys-remotely-in-linux/>

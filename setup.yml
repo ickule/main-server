@@ -1,10 +1,13 @@
 ---
-- hosts: staging_server
+- name: Staging server
+  hosts: staging
 
   handlers:
-    - import_tasks: handlers/main.yml
+    - name: Handlers
+      ansible.builtin.import_tasks: handlers/main.yml
 
   roles:
+    - role: dropbear
     - role: system
     - role: hostname
     - role: ssh

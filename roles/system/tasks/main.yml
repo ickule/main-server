@@ -1,35 +1,32 @@
 ---
 - name: Update apt packages
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
     upgrade: full
-    autoclean: yes
-    autoremove: yes
-
-- name: Uninstall libculr4 that prevents installing curl properly
-  apt:
-    name:
-      - libcurl4
-    state: absent
+    update_cache: true
+    autoclean: true
+    autoremove: true
 
 - name: Check if reboot is needed
-  stat:
+  ansible.builtin.stat:
     path: /var/run/reboot-required
-  register: reboot_required
+  notify: Reboot
 
 - name: Reboot if required
-  reboot:
+  ansible.builtin.reboot:
   when: reboot_required.stat.exists
 
-- name: Enable passwordless sudo for "{{ username }}"
-  lineinfile:
+- name: Enable passwordless sudo
+  ansible.builtin.lineinfile:
     path: /etc/sudoers
-    regexp: "^%sudo"
+    regexp: ^%sudo
     line: "{{ username }} ALL=(ALL) NOPASSWD: ALL"
-    validate: "/usr/sbin/visudo -cf %s"
+    validate: /usr/sbin/visudo -cf %s
 
 - name: Disable suspend when lid is closed
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/logind.conf
-    regexp: "^HandleLidSwitch"
-    line: "HandleLidSwitch=ignore"
+    regexp: ^HandleLidSwitch
+    line: HandleLidSwitch=ignore
+
+- name: Allow all handlers to run
+  ansible.builtin.meta: flush_handlers

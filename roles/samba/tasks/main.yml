@@ -1,34 +1,28 @@
 ---
-- name: Install Samba.
-  apt:
+- name: Install Samba
+  ansible.builtin.apt:
     name:
       - samba
-    state: latest
+    state: present
 
 - name: Create samba folder
-  file:
+  ansible.builtin.file:
     path: "{{ samba_share_path }}"
     state: directory
-    mode: "0755"
-    owner: "{{ username }}"
-    group: "{{ username }}"
+    mode: 0777 # Giving read/write access to groups and all to access as guest
 
 - name: Adding the configuration for the share
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/samba/smb.conf
     insertafter:
     block: |
       [nas]
       path = {{ samba_share_path }}
-      valid users = {{ username }}
-      public = no
-      writeable = yes
-    backup: yes
-  register: configuration_change
+      guest only = yes
+      public = yes
+      read only = no
+    backup: true
+  notify: Restart smbd service
 
-- name: Ensure Samba is running and set to start on boot.
-  service:
-    name: smbd
-    state: started
-    enabled: true
-  when: configuration_change.changed
+- name: Allow all handlers to run
+  ansible.builtin.meta: flush_handlers

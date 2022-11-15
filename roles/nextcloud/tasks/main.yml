@@ -1,132 +1,22 @@
 ---
+- name: Create build directory for the custom nextcloud image
+  ansible.builtin.file:
+    path: "{{ docker_volumes_root }}"
+    state: directory
+    mode: 0755
+
 - name: Create a docker network for nextcloud related services
-  docker_network:
+  community.docker.docker_network:
     name: nextcloud
 
-- name: Create data directory for Postgres
-  file:
-    path: "{{ docker_volumes_root }}/Postgres"
-    state: directory
+- name: Postgres docker setup
+  ansible.builtin.include_tasks: postgres.yml
 
-- name: Deploy the Postgres database for nextcloud
-  docker_container:
-    image: "postgres:alpine"
-    name: postgres
-    pull: yes
-    container_default_behavior: no_defaults
-    env:
-      POSTGRES_DB: nextcloud_database
-      POSTGRES_PASSWORD: "{{ postgres_nextcloud_password }}"
-      POSTGRES_USER: nextcloud_user
-    network_mode: defaults
-    networks:
-      - name: nextcloud
-    restart_policy: always
-    volumes:
-      - "{{ docker_volumes_root }}/Postgres/data:/var/lib/postgressql/data"
+- name: Redis docker setup
+  ansible.builtin.include_tasks: redis.yml
 
-- name: Create build directory for the custom Nextcloud image
-  file:
-    path: "{{ docker_volumes_root }}/Nextcloud/build"
-    state: directory
+- name: Nextcloud docker setup
+  ansible.builtin.include_tasks: nextcloud.yml
 
-- name: Copy the Dockerfile for the custom docker image
-  copy:
-    src: Dockerfile.j2
-    dest: "{{ docker_volumes_root }}/Nextcloud/build/Dockerfile"
-
-- name: Copy the supervisor file for the custom docker image
-  copy:
-    src: supervisord.conf.j2
-    dest: "{{ docker_volumes_root }}/Nextcloud/build/supervisord.conf"
-
-- name: Build the custom nextcloud image
-  docker_image:
-    build:
-      path: "{{ docker_volumes_root }}/Nextcloud/build"
-      pull: yes
-    name: custom_nextcloud
-    source: build
-    state: present
-
-- name: Deploy Nextcloud
-  docker_container:
-    image: custom_nextcloud
-    name: nextcloud
-    env:
-      POSTGRES_DB: nextcloud_database
-      POSTGRES_HOST: postgres
-      POSTGRES_PASSWORD: "{{ postgres_nextcloud_password }}"
-      POSTGRES_USER: nextcloud_user
-      NEXTCLOUD_ADMIN_USER: "nextcloud_admin"
-      NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud_admin_password }}"
-      NEXTCLOUD_TRUSTED_DOMAINS: "{{ nextcloud_domain }}"
-      NEXTCLOUD_UPDATE: "1"
-      SMTP_HOST: "{{ nextcloud_email.host }}"
-      SMTP_SECURE: "tls"
-      SMTP_PORT: "{{ nextcloud_email.port }}"
-      SMTP_AUTHTYPE: "LOGIN"
-      SMTP_NAME: "{{ nextcloud_email.user }}"
-      SMTP_PASSWORD: "{{ nextcloud_email.password }}"
-      MAIL_FROM_ADDRESS: "{{ nextcloud_email.from }}"
-      MAIL_DOMAIN: "{{ nextcloud_email.domain }}"
-      TRUSTED_PROXIES: "caddy"
-    network_mode: defaults
-    networks:
-      - name: nextcloud
-    restart_policy: always
-    volumes:
-      - "{{ docker_volumes_root }}/Nextcloud/data:/var/www/html"
-
-- name: Wainting for nextcloud to fully install
-  wait_for:
-    path: "{{ docker_volumes_root }}/Nextcloud/data/config/config.php"
-    search_regex: "1 => '{{ nextcloud_domain }}',"
-    delay: 60
-
-- name: Add default country phone number to nextcloud
-  lineinfile:
-    path: "{{ docker_volumes_root }}/Nextcloud/data/config/config.php"
-    insertbefore: "^\\);$"
-    line: "  'default_phone_region' => 'FR',"
-  register: nextcloud_config_changed
-
-- name: Restart nextcloud after config change
-  docker_container:
-    name: nextcloud
-    restart: yes
-  when: nextcloud_config_changed.changed
-
-- name: Create data directory for the Caddy image
-  file:
-    path: "{{ docker_volumes_root }}/Caddy"
-    state: directory
-
-- name: Copy the Caddyfile for the Caddy image
-  template:
-    src: Caddyfile.j2
-    dest: "{{ docker_volumes_root }}/Caddy/Caddyfile"
-  register: caddy_file_changed
-
-- name: Deploy Caddy
-  docker_container:
-    image: "caddy:alpine"
-    name: caddy
-    pull: yes
-    network_mode: defaults
-    networks:
-      - name: nextcloud
-    ports:
-      - "443:443"
-    restart_policy: always
-    volumes:
-      - "{{ docker_volumes_root }}/Caddy/Caddyfile:/etc/caddy/Caddyfile"
-      - "{{ docker_volumes_root }}/Caddy/data:/data"
-    volumes_from:
-      - nextcloud
-
-- name: Restart caddy caddyfile changed
-  docker_container:
-    name: caddy
-    restart: yes
-  when: caddy_file_changed.changed
+- name: Caddy docker setup
+  ansible.builtin.include_tasks: caddy.yml

@@ -1,3 +1,6 @@
 ---
-- include_tasks: email.yml
-- include_tasks: unattended_upgrades.yml
+- name: Email setup
+  ansible.builtin.include_tasks: email.yml
+
+- name: Setup unatended upgrades
+  ansible.builtin.include_tasks: unattended_upgrades.yml

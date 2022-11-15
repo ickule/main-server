@@ -1,0 +1,39 @@
+---
+- name: Get infos on container
+  community.docker.docker_container_info:
+    name: caddy
+  register: caddy_container
+
+- name: Create data directory for the caddy image
+  ansible.builtin.file:
+    path: "{{ docker_volumes_root }}/caddy"
+    state: directory
+    mode: 0755
+
+- name: Copy the Caddyfile for the caddy image
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: "{{ docker_volumes_root }}/caddy/Caddyfile"
+    mode: 0644
+  notify: Restart caddy container
+
+- name: Deploy caddy
+  community.docker.docker_container:
+    image: caddy:alpine
+    name: caddy
+    pull: true
+    container_default_behavior: no_defaults
+    network_mode: defaults
+    networks:
+      - name: nextcloud
+    ports:
+      - 443:443
+    restart_policy: always
+    volumes:
+      - "{{ docker_volumes_root }}/caddy/Caddyfile:/etc/caddy/Caddyfile"
+      - "{{ docker_volumes_root }}/caddy/data:/data"
+    volumes_from:
+      - nextcloud
+
+- name: Allow all handlers to run
+  ansible.builtin.meta: flush_handlers

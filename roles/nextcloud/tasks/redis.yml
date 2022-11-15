@@ -1,0 +1,12 @@
+---
+- name: Deploy Redis
+  community.docker.docker_container:
+    image: redis:alpine
+    name: redis
+    pull: true
+    container_default_behavior: no_defaults
+    network_mode: defaults
+    networks:
+      - name: nextcloud
+    restart_policy: always
+    command: ["redis-server", "--requirepass {{ redis.password }}"]

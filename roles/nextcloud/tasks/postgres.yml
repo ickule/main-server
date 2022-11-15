@@ -1,0 +1,23 @@
+---
+- name: Create data directory for postgres
+  ansible.builtin.file:
+    path: "{{ docker_volumes_root }}/postgressql"
+    state: directory
+    mode: 0755
+
+- name: Deploy the postgres database for nextcloud
+  community.docker.docker_container:
+    image: postgres:alpine
+    name: postgres
+    pull: true
+    container_default_behavior: no_defaults
+    env:
+      POSTGRES_DB: nextcloud
+      POSTGRES_PASSWORD: "{{ postgres.nextcloud.password }}"
+      POSTGRES_USER: nextcloud
+    network_mode: defaults
+    networks:
+      - name: nextcloud
+    restart_policy: always
+    volumes:
+      - "{{ docker_volumes_root }}/postgressql/data:/var/lib/postgressql/data"

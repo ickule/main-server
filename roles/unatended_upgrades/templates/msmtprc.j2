@@ -7,15 +7,15 @@ tls             on
 auto_from       off
 logfile         /var/log/msmtp
 
-# {{ msmtp_account.account }} account
-account         {{ msmtp_account.account }}
-host            {{ msmtp_account.host }}
-port            {{ msmtp_account.port }}
-from            {{ msmtp_account.from }}
-user            {{ msmtp_account.user }}
-password        {{ msmtp_account.password }}
-tls_starttls    {{ msmtp_account.tls_starttls }}
-domain          {{ msmtp_account.msmtp_domain }}
+# {{ msmtp.account }} account
+account         {{ msmtp.account }}
+host            {{ msmtp.host }}
+port            {{ msmtp.port }}
+from            {{ msmtp.from }}
+user            {{ msmtp.user }}
+password        {{ msmtp.password }}
+tls_starttls    {{ msmtp.tls_starttls }}
+domain          {{ msmtp.domain }}
 
 # Default account to use
-account default : {{ msmtp_account.account }}
+account default : {{ msmtp.account }}

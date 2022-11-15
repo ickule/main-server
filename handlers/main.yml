@@ -1,15 +1,35 @@
 ---
 - name: Reboot
-  reboot:
+  ansible.builtin.reboot:
+  when: reboot_required.stat.exists
 
-- name: Restart Docker
-  service:
+- name: Restart docker service
+  ansible.builtin.service:
     name: docker
     state: restarted
+    enabled: true
 
-# sending test mail using 'mail' command to root and test recipient
-- name: Test mail
-  shell: echo "Test mail from new/updated mSTMP\n\n $(uname -a)" | mail -s "Test mSMTP at $(hostname -f)" {{ msmtp_account.user }}
-  tags: mail
-  async: 30
-  poll: 5
+- name: Restart sshd service
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+    enabled: true
+
+- name: Restart smbd service
+  ansible.builtin.service:
+    name: smbd
+    state: restarted
+    enabled: true
+
+- name: Restart caddy container
+  community.docker.docker_container:
+    name: caddy
+    restart: true
+    container_default_behavior: no_defaults
+  when: caddy_container.exists
+
+- name: Test mail setup
+  ansible.builtin.shell: echo "Test mail from new/updated mSTMP\n\n $(uname -a)" | mail -s "Test mSMTP at $(hostname -f)" {{ msmtp.user }}
+
+- name: Rebuild initramfs
+  ansible.builtin.command: update-initramfs -u

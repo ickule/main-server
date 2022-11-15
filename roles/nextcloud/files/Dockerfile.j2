@@ -3,19 +3,22 @@ FROM nextcloud:fpm-alpine
 # Update the container
 RUN apk -U upgrade
 
+# Add necessary build dependencies into temporary build-deps folder
 RUN apk add --no-cache --virtual .build-deps autoconf automake file g++ gcc make php8-dev re2c samba-dev zlib-dev;
 
+# Add smb support
 RUN apk add --no-cache libsmbclient;
 RUN pecl install smbclient;
 RUN docker-php-ext-enable smbclient;
 
-RUN apk add --no-cache imagemagick; 
+# Add image viewer suport
+RUN apk add --no-cache imagemagick;
 
 # Install cron support
 RUN apk add --no-cache supervisor
 RUN mkdir /var/log/supervisord /var/run/supervisord
 COPY supervisord.conf /
-
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf"]
 
+# remove temporary build-deps folder
 RUN apk del .build-deps

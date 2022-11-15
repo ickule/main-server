@@ -1,6 +1,0 @@
----
-username: debian
-ip: 192.168.1.4
-hostname: mi
-samba_share_path: /external_storage/encrypted/media
-docker_volumes_root: /external_storage/encrypted/system/docker_volumes

@@ -1,14 +1,11 @@
 ---
-- name: Store oiriginal hostname
-  command: cat /etc/hostname
-  register: original_hostname_cmd
-
-- name: Change hostname
-  hostname:
+- name: Set the hostname
+  ansible.builtin.hostname:
     name: "{{ hostname }}"
 
-- name: Replace old hostname with new hostname
-  replace:
+- name: Set the hosts file
+  ansible.builtin.lineinfile:
     path: /etc/hosts
-    regexp: "{{ original_hostname_cmd.stdout }}"
-    replace: "{{ hostname }}"
+    insertafter: ^127\.0\.0\.1 *localhost
+    line: 127.0.0.1 {{ hostname }}
+    mode: 0644

@@ -1,21 +1,20 @@
 ---
 - name: Install dyndns nescessary package
-  apt:
+  ansible.builtin.apt:
     name:
       - curl
-    state: latest
+    state: present
 
-- name: Add template script file for Dyn DNS support
-  template:
+- name: Add template script file for DynDNS support
+  ansible.builtin.template:
     src: dyndns_nextcloud.sh.j2
-    dest: /usr/local/bin/dyndns_nextcloud.sh
-    owner: "{{ username }}"
-    group: "{{ username }}"
+    dest: /usr/local/sbin/dyndns_nextcloud.sh
+    mode: 0644
 
 - name: Add a cron job to automatically update the DyNDNS IP address
-  cron:
-    job: "bash /usr/local/bin/dyndns_nextcloud.sh"
-    hour: "0" # Will run every day at 00:00:00
-    minute: "0"
-    name: "Update the DyNDNS IP address"
-    user: "{{ username }}"
+  ansible.builtin.cron:
+    job: bash /usr/local/sbin/dyndns_nextcloud.sh
+    # Will run every day at 00:00:00
+    hour: 0
+    minute: 0
+    name: Update the DyNDNS IP address

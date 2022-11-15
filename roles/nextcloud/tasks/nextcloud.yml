@@ -1,0 +1,71 @@
+---
+- name: Create build directory for the custom nextcloud image
+  ansible.builtin.file:
+    path: "{{ docker_volumes_root }}/nextcloud/build"
+    state: directory
+    mode: 0755
+
+- name: Copy the Dockerfile for the custom docker image
+  ansible.builtin.copy:
+    src: Dockerfile.j2
+    dest: "{{ docker_volumes_root }}/nextcloud/build/Dockerfile"
+    mode: 0644
+
+- name: Copy the supervisor file for the custom docker image
+  ansible.builtin.copy:
+    src: supervisord.conf.j2
+    dest: "{{ docker_volumes_root }}/nextcloud/build/supervisord.conf"
+    mode: 0644
+
+- name: Build the custom nextcloud image
+  community.docker.docker_image:
+    build:
+      path: "{{ docker_volumes_root }}/nextcloud/build"
+      pull: true
+    name: custom_nextcloud
+    source: build
+    state: present
+
+- name: Deploy nextcloud
+  community.docker.docker_container:
+    image: custom_nextcloud
+    name: nextcloud
+    container_default_behavior: no_defaults
+    env:
+      POSTGRES_DB: nextcloud
+      POSTGRES_HOST: postgres
+      POSTGRES_PASSWORD: "{{ postgres.nextcloud.password }}"
+      POSTGRES_USER: nextcloud
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud.admin.password }}"
+      NEXTCLOUD_TRUSTED_DOMAINS: "{{ nextcloud.domain }}"
+      NEXTCLOUD_UPDATE: "1" # double quotes necessary here
+      SMTP_HOST: "{{ nextcloud.email.host }}"
+      SMTP_SECURE: tls
+      SMTP_PORT: "{{ nextcloud.email.port }}"
+      SMTP_AUTHTYPE: LOGIN
+      SMTP_NAME: "{{ nextcloud.email.user }}"
+      SMTP_PASSWORD: "{{ nextcloud.email.password }}"
+      MAIL_FROM_ADDRESS: "{{ nextcloud.email.from }}"
+      MAIL_DOMAIN: "{{ nextcloud.email.domain }}"
+      TRUSTED_PROXIES: caddy
+      REDIS_HOST: redis
+      REDIS_HOST_PASSWORD: "{{ redis.password }}"
+    network_mode: defaults
+    networks:
+      - name: nextcloud
+    restart_policy: always
+    volumes:
+      - "{{ docker_volumes_root }}/nextcloud/data:/var/www/html"
+# - name: Wainting for nextcloud to fully install
+#   ansible.builtin.wait_for:
+#     path: "{{ docker_volumes_root }}/nextcloud/data/config/config.php"
+#     search_regex: "1 => '{{ nextcloud.domain }}',"
+#     delay: 60
+
+# - name: Add default country phone number to nextcloud
+#   ansible.builtin.lineinfile:
+#     path: "{{ docker_volumes_root }}/nextcloud/data/config/config.php"
+#     insertbefore: "^\\);$"
+#     line: "  'default_phone_region' => 'FR',"
+#   notify: nextcloud

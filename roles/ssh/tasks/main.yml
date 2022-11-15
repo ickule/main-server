@@ -1,28 +1,22 @@
 ---
 - name: Update SSH configuration to be more secure
-  register: sshd_config
-  lineinfile:
-    dest: "/etc/ssh/sshd_config"
+  ansible.builtin.lineinfile:
+    dest: /etc/ssh/sshd_config
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
     state: present
-    validate: "sshd -T -f %s"
+    validate: sshd -T -f %s
     mode: 0644
   with_items:
-    - regexp: "^#?PasswordAuthentication"
-      line: "PasswordAuthentication no"
-    - regexp: "^#?PermitRootLogin"
-      line: "PermitRootLogin no"
-    # - regexp: "^#?Port"
-    #   line: "Port {{ ssh_port }}"
-    - regexp: "^#?PermitEmptyPasswords"
-      line: "PermitEmptyPasswords no"
-    - regexp: "^#?X11Forwarding"
-      line: "X11Forwarding no"
+    - regexp: ^#?PasswordAuthentication
+      line: PasswordAuthentication no
+    - regexp: ^#?PermitRootLogin
+      line: PermitRootLogin no
+    - regexp: ^#?PermitEmptyPasswords
+      line: PermitEmptyPasswords no
+    - regexp: ^#?X11Forwarding
+      line: X11Forwarding no
+  notify: Restart sshd service
 
-- name: Restart SSH daemon
-  service:
-    name: sshd
-    enabled: yes
-    state: restarted
-  when: sshd_config.changed
+- name: Allow all handlers to run
+  ansible.builtin.meta: flush_handlers

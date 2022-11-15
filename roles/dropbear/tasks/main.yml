@@ -1,0 +1,28 @@
+---
+- name: Install dropbear server
+  ansible.builtin.apt:
+    name:
+      - dropbear-initramfs
+    state: present
+    update_cache: true
+
+- name: Update dropbear config file
+  ansible.builtin.copy:
+    src: "{{ item }}.j2"
+    dest: /etc/dropbear/initramfs/{{ item }}
+    mode: 0644
+  with_items:
+    - dropbear.conf
+    - authorized_keys
+
+- name: Adding IP configuration to initramfs
+  ansible.builtin.blockinfile:
+    path: /etc/initramfs-tools/initramfs.conf
+    insertafter:
+    block: |
+      IP={{ ip }}::{{ gateway }}:{{ netmask }}:{{ hostname }}
+    backup: true
+  notify: Rebuild initramfs
+
+- name: Allow all handlers to run
+  ansible.builtin.meta: flush_handlers
