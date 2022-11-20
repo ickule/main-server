@@ -7,7 +7,7 @@
 
 - name: Deploy the postgres database for nextcloud
   community.docker.docker_container:
-    image: postgres:alpine
+    image: postgres:14-alpine
     name: postgres
     pull: true
     container_default_behavior: no_defaults

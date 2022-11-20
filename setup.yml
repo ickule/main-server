@@ -1,6 +1,6 @@
 ---
-- name: Staging server
-  hosts: staging
+- name: Production server
+  hosts: production
 
   handlers:
     - name: Handlers

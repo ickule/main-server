@@ -1,4 +1,9 @@
 ---
+- name: Install aptitude
+  ansible.builtin.apt:
+    name: aptitude
+    state: present
+
 - name: Update apt packages
   ansible.builtin.apt:
     upgrade: full
@@ -9,11 +14,7 @@
 - name: Check if reboot is needed
   ansible.builtin.stat:
     path: /var/run/reboot-required
-  notify: Reboot
-
-- name: Reboot if required
-  ansible.builtin.reboot:
-  when: reboot_required.stat.exists
+  register: reboot_required
 
 - name: Enable passwordless sudo
   ansible.builtin.lineinfile:
