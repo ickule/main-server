@@ -14,7 +14,6 @@
 - name: Add a cron job to automatically update the DyNDNS IP address
   ansible.builtin.cron:
     job: bash /usr/local/sbin/dyndns_nextcloud.sh
-    # Will run every day at 00:00:00
-    hour: 0
-    minute: 0
+    # Will run every 5 minutes
+    hour: "*/5"
     name: Update the DyNDNS IP address
