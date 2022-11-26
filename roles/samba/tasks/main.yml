@@ -9,7 +9,9 @@
   ansible.builtin.file:
     path: "{{ samba_share_path }}"
     state: directory
-    mode: 0777 # Giving read/write access to groups and all to access as guest
+    mode: 0755 # Giving read/write access to groups and all to access as guest
+    owner: nobody
+    group: nogroup
 
 - name: Adding the configuration for the share
   ansible.builtin.blockinfile:
