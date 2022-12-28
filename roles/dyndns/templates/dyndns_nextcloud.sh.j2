@@ -9,7 +9,7 @@ DOMAIN_NAME='{{ nextcloud.domain }}'
 ####DO NOT TOUCH#####
 #####################
 
-PUBLIC_IP=$(curl --silent ifconfig.co)
+PUBLIC_IP=$(curl --silent -4 ifconfig.co)
 
 #Call OVH for update
 curl --silent --user "$DYNHOST_ID:$DYNHOST_PASSWORD" "https://www.ovh.com/nic/update?system=dyndns&hostname=$DOMAIN_NAME&myip=$PUBLIC_IP"
