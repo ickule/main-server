@@ -1,4 +1,5 @@
 ---
 username: staging
-ip: 192.168.1.13
+ip: 192.168.1.30
+dropbear_ip: 192.168.1.5
 hostname: staging

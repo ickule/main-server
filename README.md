@@ -30,6 +30,12 @@ To setup a new key, you can use the following.
     ssh-copy-id -i /path/to/your/private/key/file username@ip_address
     ```
 
+* Install ansible-galxy requirements
+
+    ```sh
+    ansible-galaxy install -r requirements.yml
+    ```
+
 ### 1.2 Creating a secret vault
 
 Create a new secret vault with ansible:

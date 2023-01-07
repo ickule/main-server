@@ -1,6 +1,7 @@
 ### Ansible ###
 *.retry
 secret*
+.fact_cache/
 
 ### VSCode ###
 .vscode/

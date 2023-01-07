@@ -9,12 +9,6 @@
     state: restarted
     enabled: true
 
-- name: Restart sshd service
-  ansible.builtin.service:
-    name: sshd
-    state: restarted
-    enabled: true
-
 - name: Restart smbd service
   ansible.builtin.service:
     name: smbd
@@ -27,9 +21,6 @@
     restart: true
     container_default_behavior: no_defaults
   when: caddy_container.exists
-
-- name: Test mail setup
-  ansible.builtin.shell: echo "Test mail from new/updated mSTMP\n\n $(uname -a)" | mail -s "Test mSMTP at $(hostname -f)" {{ msmtp.user }}
 
 - name: Rebuild initramfs
   ansible.builtin.command: update-initramfs -u

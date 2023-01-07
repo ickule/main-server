@@ -1,6 +1,10 @@
-Unattended-Upgrade::MinimalSteps "true";
-Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Automatic-Reboot "{{ autoupdate_reboot }}";
 Unattended-Upgrade::Automatic-Reboot-Time "{{ autoupdate_reboot_time }}";
-Unattended-Upgrade::MailReport "on-change"; // Could be "always, "on-change" or "only-on-error"
+Unattended-Upgrade::Mail "{{ autoupdate_mail_to }}";
+Unattended-Upgrade::MailReport "{{ autoupdate_mail_report }}"; 
+Unattended-Upgrade::MinimalSteps "true";
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
-Unattended-Upgrade::Mail "{{ msmtp.user }}";
+Unattended-Upgrade::Allowed-Origins {
+    "${distro_id} ${distro_codename}-security";
+    "${distro_id} ${distro_codename}-updates";
+};

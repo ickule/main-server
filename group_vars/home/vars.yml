@@ -1,7 +1,68 @@
 ---
+#
+# Ansible
+#
+
 ssh_key: ~/.ssh/id_ed25519
+
+#
+# Email credentials (for notifications)
+#
+
+email: gse.egt@mailbox.org
+email_smtp_host: smtp.mailbox.org
+email_smtp_port_startls: 587
+
+#
+# MSMTP (chriswayg.msmtp-mailer)
+#
+
+msmtp_accounts:
+    - account: mailbox
+      host: "{{ email_smtp_host }}"
+      port: "{{ email_smtp_port_startls }}"
+      auth: "on"
+      from: "{{ email }}"
+      user: "{{ email }}"
+      password: "{{ email_password }}"
+
+msmtp_default_account: "mailbox"
+
+msmtp_alias_default: "{{ email }}"
+
+#
+# SSH security (geerlingguy.security)
+#
+
+security_sudoers_passwordless: ["{{ username }}"]
+security_autoupdate_enabled: false # Will handle manually
+
+#
+# Unatended upgrades
+#
+
+autoupdate_reboot: false
+autoupdate_mail_to: "{{ email }}"
 autoupdate_reboot_time: 03:00
+autoupdate_mail_report: on-change #Could be "always", "on-change" or "only-on-error"
+
+
+#
+# Docker
+#
+
+docker_source_url: https://download.docker.com/linux/{{ ansible_distribution | lower }}
+docker_volumes_root: /ztank/vault/volumes
+
+#
+# Dropbrear
+#
+
 gateway: 192.168.1.1
 netmask: 255.255.255.0
+
+#
+# Samba
+#
+
 samba_share_path: /ztank/vault/media
-docker_volumes_root: /ztank/vault/volumes

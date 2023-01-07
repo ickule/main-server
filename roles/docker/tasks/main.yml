@@ -1,16 +1,12 @@
 ---
-- name: Set variable for the playbook
-  ansible.builtin.set_fact:
-    source_url: https://download.docker.com/linux/{{ ansible_distribution | lower }}
-
 - name: Add Docker apt key
   ansible.builtin.apt_key:
-    url: "{{ source_url }}/gpg"
+    url: "{{ docker_source_url }}/gpg"
     id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 
 - name: Add Docker apt repository
   ansible.builtin.apt_repository:
-    repo: deb {{ source_url }} {{ ansible_distribution_release }} stable
+    repo: deb {{ docker_source_url }} {{ ansible_distribution_release }} stable
     filename: docker
 
 - name: Install Docker and the python3-docker module

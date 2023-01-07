@@ -1,6 +1,16 @@
 ---
-- name: Email setup
-  ansible.builtin.include_tasks: email.yml
+- name: Install essential packages for unatended upgrades
+  ansible.builtin.apt:
+    name:
+      - unattended-upgrades
+      - powermgmt-base # Prevent upgrade install if on battery
+    state: present
 
-- name: Setup unatended upgrades
-  ansible.builtin.include_tasks: unattended_upgrades.yml
+- name: Copy unattended-upgrades configuration files in place
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: /etc/apt/apt.conf.d/{{ item }}
+    mode: 0644
+  with_items:
+    - 10periodic
+    - 50unattended-upgrades

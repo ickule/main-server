@@ -10,7 +10,8 @@
     - role: dropbear
     - role: system
     - role: hostname
-    - role: ssh
+    - role: geerlingguy.security
     - role: unatended_upgrades
+    - role: chriswayg.msmtp-mailer
     - role: docker
     - role: zfs
